@@ -1,74 +1,89 @@
+D
 # C4 — Sistema de loja de vinil
-
+ 
 Diagrama C4 completo (Contexto, Container, Componente e Código) do sistema, feito com Mermaid.
-
+ 
 ## Nível 1 — Contexto
-
+ 
 ```mermaid
-C4Context
-    title Diagrama de Contexto - Sistema de loja de vinil
-
-    Person(cliente, "Cliente", "Busca e compra discos de vinil")
-    Person(funcionario, "Funcionário", "Gerencia o catálogo e os pedidos")
-
-    System(sistema, "Sistema de loja de vinil", "Permite comprar discos de vinil online")
-
-    System_Ext(pagamento, "Sistema de pagamento", "Processa pagamentos")
-    System_Ext(frete, "Serviço de frete", "Calcula e rastreia entregas")
-
-    Rel(cliente, sistema, "Usa")
-    Rel(funcionario, sistema, "Gerencia")
-    Rel(sistema, pagamento, "Envia cobranças")
-    Rel(sistema, frete, "Solicita envios")
+flowchart TD
+    Cliente(["Cliente<br/>Busca e compra discos"])
+    Funcionario(["Funcionário<br/>Gerencia o catálogo"])
+    Sistema["Sistema de loja de vinil<br/>Vende discos online"]
+    Pagamento[["Sistema de pagamento<br/>Processa pagamentos"]]
+    Frete[["Serviço de frete<br/>Calcula e rastreia entregas"]]
+ 
+    Cliente --> Sistema
+    Funcionario --> Sistema
+    Sistema --> Pagamento
+    Sistema --> Frete
+ 
+    classDef person fill:#378ADD,stroke:#185FA5,color:#fff
+    classDef system fill:#7F77DD,stroke:#534AB7,color:#fff
+    classDef ext fill:#B4B2A9,stroke:#5F5E5A,color:#000
+ 
+    class Cliente,Funcionario person
+    class Sistema system
+    class Pagamento,Frete ext
 ```
-
+ 
 ## Nível 2 — Container
-
+ 
 ```mermaid
-C4Container
-    title Diagrama de Container - Sistema de loja de vinil
-
-    Person(cliente, "Cliente")
-
-    System_Boundary(sistema, "Sistema de loja de vinil") {
-        Container(web, "Aplicação web", "React", "Catálogo, carrinho e checkout")
-        Container(api, "API", "Node.js", "Regras de negócio e pedidos")
-        ContainerDb(db, "Banco de dados", "PostgreSQL", "Armazena vinis, pedidos e clientes")
-    }
-
-    System_Ext(pagamento, "Sistema de pagamento")
-
-    Rel(cliente, web, "Acessa via navegador")
-    Rel(web, api, "Faz requisições JSON/HTTPS")
-    Rel(api, db, "Lê e grava dados")
-    Rel(api, pagamento, "Solicita cobrança")
+flowchart TD
+    Cliente(["Cliente"])
+ 
+    subgraph Sistema["Sistema de loja de vinil"]
+        Web["Aplicação web<br/>React"]
+        Api["API<br/>Node.js"]
+        Db[("Banco de dados<br/>PostgreSQL")]
+        Web --> Api
+        Api --> Db
+    end
+ 
+    Pagamento[["Sistema de pagamento"]]
+ 
+    Cliente --> Web
+    Api --> Pagamento
+ 
+    classDef person fill:#378ADD,stroke:#185FA5,color:#fff
+    classDef container fill:#5DCAA5,stroke:#0F6E56,color:#000
+    classDef ext fill:#B4B2A9,stroke:#5F5E5A,color:#000
+ 
+    class Cliente person
+    class Web,Api,Db container
+    class Pagamento ext
 ```
-
+ 
 ## Nível 3 — Componente
-
+ 
 ```mermaid
-C4Component
-    title Diagrama de Componentes - API
-
-    Container_Boundary(api, "API") {
-        Component(catalogo, "Controlador de catálogo", "Controller", "Lista e busca discos")
-        Component(pedidos, "Controlador de pedidos", "Controller", "Cria e confirma pedidos")
-        Component(repo, "Repositório", "Repository", "Consulta o banco de dados")
-        Component(servicoPag, "Serviço de pagamento", "Service", "Comunica com o gateway externo")
-    }
-
-    ContainerDb(db, "Banco de dados")
-    System_Ext(pagamento, "Sistema de pagamento")
-
-    Rel(catalogo, repo, "Usa")
-    Rel(pedidos, repo, "Usa")
-    Rel(pedidos, servicoPag, "Usa")
-    Rel(repo, db, "Consulta")
-    Rel(servicoPag, pagamento, "Chama")
+flowchart TD
+    subgraph Api["API"]
+        Catalogo["Controlador de catálogo"]
+        Pedidos["Controlador de pedidos"]
+        Repo["Repositório"]
+        ServicoPag["Serviço de pagamento"]
+        Catalogo --> Repo
+        Pedidos --> Repo
+        Pedidos --> ServicoPag
+    end
+ 
+    Db[("Banco de dados")]
+    Pagamento[["Sistema de pagamento"]]
+ 
+    Repo --> Db
+    ServicoPag --> Pagamento
+ 
+    classDef comp fill:#F0997B,stroke:#993C1D,color:#000
+    classDef ext fill:#B4B2A9,stroke:#5F5E5A,color:#000
+ 
+    class Catalogo,Pedidos,Repo,ServicoPag comp
+    class Db,Pagamento ext
 ```
-
+ 
 ## Nível 4 — Código
-
+ 
 ```mermaid
 classDiagram
     class Pedido {
@@ -87,8 +102,9 @@ classDiagram
     class ServicoPagamento {
         +processar(pedido)
     }
-
+ 
     Pedido --> GatewayPagamento : usa
     GatewayCartao ..|> GatewayPagamento : implementa
     GatewayCartao --> ServicoPagamento : usa
 ```
+ 
